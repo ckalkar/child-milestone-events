@@ -1,0 +1,14 @@
+# ngrok configuration for Child Milestone Events application
+# This configuration creates tunnels for both backend and frontend
+
+version: "2"
+tunnels:
+  backend:
+    proto: http
+    addr: 3000
+    # Backend API server (NestJS)
+  frontend:
+    proto: http
+    addr: 4200
+    # Frontend dev server (Angular)
+

@@ -1,0 +1,134 @@
+<div class="container">
+  <div class="page-header">
+    <h1>{{ isEditMode ? 'Edit Milestone' : 'Add New Milestone' }}</h1>
+  </div>
+
+  <mat-card class="form-card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <!-- Title -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" placeholder="e.g., First Steps" required />
+          <mat-error *ngIf="form.get('title')?.hasError('required')">
+            Title is required
+          </mat-error>
+          <mat-error *ngIf="form.get('title')?.hasError('maxlength')">
+            Title must be less than 255 characters
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Event Date -->
+        <mat-form-field appearance="outline">
+          <mat-label>Event Date</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            formControlName="eventDate"
+            required
+          />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="form.get('eventDate')?.hasError('required')">
+            Event date is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Category -->
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="categoryId">
+            <mat-option [value]="null">None</mat-option>
+            <mat-option *ngFor="let category of categories" [value]="category.id">
+              <mat-icon *ngIf="category.icon">{{ category.icon }}</mat-icon>
+              {{ category.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Description -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            rows="4"
+            placeholder="Describe this milestone..."
+          ></textarea>
+        </mat-form-field>
+
+        <!-- Notes -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Notes</mat-label>
+          <textarea
+            matInput
+            formControlName="notes"
+            rows="3"
+            placeholder="Additional notes or memories..."
+          ></textarea>
+        </mat-form-field>
+
+        <!-- Major Milestone -->
+        <div class="checkbox-field full-width">
+          <mat-checkbox formControlName="isMajor">
+            Mark as Major Milestone
+          </mat-checkbox>
+          <p class="hint">Major milestones are highlighted in the timeline</p>
+        </div>
+
+        <!-- File Upload -->
+        <div class="file-upload full-width">
+          <h3>Attach Photos/Videos</h3>
+          <input
+            type="file"
+            #fileInput
+            multiple
+            accept="image/*,video/*"
+            (change)="onFileSelected($event)"
+            style="display: none"
+          />
+          <button
+            type="button"
+            mat-raised-button
+            color="accent"
+            (click)="fileInput.click()"
+          >
+            <mat-icon>attach_file</mat-icon>
+            Choose Files
+          </button>
+
+          <div *ngIf="selectedFiles.length > 0" class="selected-files">
+            <h4>Selected Files ({{ selectedFiles.length }}):</h4>
+            <mat-chip-listbox>
+              <mat-chip *ngFor="let file of selectedFiles; let i = index">
+                {{ file.name }}
+                <button matChipRemove (click)="removeFile(i)">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip>
+            </mat-chip-listbox>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" mat-button (click)="cancel()" [disabled]="loading">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          mat-raised-button
+          color="primary"
+          [disabled]="form.invalid || loading"
+        >
+          <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+          <span *ngIf="!loading">
+            {{ isEditMode ? 'Update Milestone' : 'Create Milestone' }}
+          </span>
+        </button>
+      </div>
+    </form>
+  </mat-card>
+</div>
+

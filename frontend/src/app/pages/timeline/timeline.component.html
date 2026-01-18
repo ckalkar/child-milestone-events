@@ -1,0 +1,113 @@
+<div class="container">
+  <div class="page-header">
+    <h1>Growth Timeline</h1>
+    <p class="subtitle">Track your child's journey through milestones</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="loadTimeline()">
+      Retry
+    </button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && timeline.length === 0" class="empty-state">
+    <mat-icon>timeline</mat-icon>
+    <h2>No Milestones Yet</h2>
+    <p>Start tracking your child's journey by adding milestones!</p>
+    <button mat-raised-button color="primary" routerLink="/milestones">
+      Add First Milestone
+    </button>
+  </div>
+
+  <!-- Timeline -->
+  <div *ngIf="!loading && !error && timeline.length > 0" class="timeline">
+    <div *ngFor="let yearGroup of timeline" class="timeline-year">
+      <div class="year-header" style="position: static; top: 0; z-index: 10;">
+        <h2>{{ yearGroup.year }}</h2>
+      </div>
+
+      <div *ngFor="let monthGroup of yearGroup.months" class="timeline-month">
+        <div class="month-header">
+          <h3>{{ monthGroup.monthName }}</h3>
+        </div>
+
+        <div class="timeline-items">
+          <div
+            *ngFor="let milestone of monthGroup.milestones"
+            class="timeline-item"
+            [class.major]="milestone.isMajor"
+          >
+            <div class="timeline-marker">
+              <div class="marker-dot" [style.background-color]="milestone.category?.color || '#999'">
+                <mat-icon *ngIf="milestone.isMajor">star</mat-icon>
+              </div>
+              <div class="marker-line"></div>
+            </div>
+
+            <mat-card class="milestone-card">
+              <mat-card-header>
+                <div class="card-header-content">
+                  <div class="milestone-info">
+                    <mat-card-title>{{ milestone.title }}</mat-card-title>
+                    <mat-card-subtitle>
+                      <span class="date">{{ formatDate(milestone.eventDate) }}</span>
+                      <mat-chip
+                        *ngIf="milestone.category"
+                        [style.background-color]="milestone.category.color"
+                        class="category-chip"
+                      >
+                        <mat-icon *ngIf="milestone.category.icon">{{
+                          milestone.category.icon
+                        }}</mat-icon>
+                        {{ milestone.category.name }}
+                      </mat-chip>
+                    </mat-card-subtitle>
+                  </div>
+                  <mat-icon *ngIf="milestone.isMajor" class="major-icon" color="accent">
+                    star
+                  </mat-icon>
+                </div>
+              </mat-card-header>
+
+              <mat-card-content>
+                <p *ngIf="milestone.description" class="description">
+                  {{ milestone.description }}
+                </p>
+
+                <div *ngIf="getFirstImage(milestone)" class="milestone-image">
+                  <img [src]="getFirstImage(milestone)" [alt]="milestone.title" />
+                  <div *ngIf="getMediaCount(milestone) > 1" class="media-count">
+                    <mat-icon>photo_library</mat-icon>
+                    {{ getMediaCount(milestone) }} photos/videos
+                  </div>
+                </div>
+
+                <p *ngIf="milestone.notes" class="notes">
+                  <mat-icon>note</mat-icon>
+                  {{ milestone.notes }}
+                </p>
+              </mat-card-content>
+
+              <mat-card-actions>
+                <button mat-button [routerLink]="['/milestones', milestone.id]">
+                  <mat-icon>visibility</mat-icon>
+                  View Details
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

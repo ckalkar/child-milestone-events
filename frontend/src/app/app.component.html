@@ -1,0 +1,27 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <span class="toolbar-title">{{ title }}</span>
+    <span class="spacer"></span>
+    <button mat-button routerLink="/timeline" routerLinkActive="active">
+      <mat-icon>timeline</mat-icon>
+      Timeline
+    </button>
+    <button mat-button routerLink="/milestones" routerLinkActive="active">
+      <mat-icon>event</mat-icon>
+      Milestones
+    </button>
+    <button mat-button routerLink="/gallery" routerLinkActive="active">
+      <mat-icon>photo_library</mat-icon>
+      Gallery
+    </button>
+        <button mat-button routerLink="/batch-upload" routerLinkActive="active">
+      <mat-icon>file_upload</mat-icon>
+      Batch Upload
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
+

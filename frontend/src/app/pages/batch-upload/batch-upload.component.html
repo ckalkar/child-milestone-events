@@ -1,0 +1,300 @@
+<div class="batch-upload-container">
+  <h2>Batch Upload Images & Milestones</h2>
+  
+  <div class="upload-section">
+    <div class="file-input-group">
+      <label for="fileInput" class="file-label">
+        <span class="icon">📁</span>
+        <span class="text">Select Multiple Images</span>
+        <input
+          #fileInput
+          type="file"
+          id="fileInput"
+          (change)="onFilesSelected($event)"
+          multiple
+          accept="image/*,video/*"
+          class="file-input"
+        />
+      </label>
+      <p class="file-count" *ngIf="selectedFiles.length > 0">
+        {{ selectedFiles.length }} file(s) selected
+      </p>
+    </div>
+  </div>
+
+  <!-- Validation Errors -->
+  <div class="alert alert-danger" *ngIf="validationErrors.length > 0">
+    <h4>Validation Errors:</h4>
+    <ul>
+      <li *ngFor="let error of validationErrors">{{ error }}</li>
+    </ul>
+  </div>
+
+  <!-- Upload Failures -->
+  <div class="alert alert-warning" *ngIf="uploadFailures.length > 0">
+    <h4>Upload Failures:</h4>
+    <ul>
+      <li *ngFor="let failure of uploadFailures">
+        <strong>{{ failure.milestone }}:</strong> {{ failure.error }}
+      </li>
+    </ul>
+    <button
+      class="btn btn-secondary btn-sm"
+      (click)="downloadErrorReport()"
+    >
+      Download Error Report
+    </button>
+  </div>
+
+  <!-- Upload Success -->
+  <div class="alert alert-success" *ngIf="uploadSuccess && uploadSummary">
+    <h4>Upload Completed Successfully!</h4>
+    <p>
+      Processed {{ uploadSummary.processedMilestones }} /
+      {{ uploadSummary.totalMilestones }} milestones with
+      {{ uploadSummary.processedMedia }} media files
+    </p>
+  </div>
+
+  <!-- Milestones Form Array -->
+  <form [formGroup]="batchForm" class="milestones-form">
+    <div formArrayName="milestones" class="milestones-list">
+      <div
+        *ngFor="let milestone of milestonesArray.controls; let i = index"
+        [formGroupName]="i"
+        class="milestone-card"
+      >
+        <div class="milestone-header">
+          <h3>Milestone {{ i + 1 }}</h3>
+          <button
+            type="button"
+            class="btn btn-sm btn-danger"
+            (click)="removeMilestone(i)"
+            [disabled]="milestonesArray.length === 1"
+          >
+            Remove
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label for="title-{{ i }}">Title *</label>
+          <input
+            type="text"
+            id="title-{{ i }}"
+            formControlName="title"
+            class="form-control"
+            placeholder="e.g., First Birthday"
+          />
+          <div
+            class="invalid-feedback"
+            *ngIf="
+              milestonesArray.at(i).get('title')?.invalid &&
+              milestonesArray.at(i).get('title')?.touched
+            "
+          >
+            Title is required and must be less than 255 characters
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="eventDate-{{ i }}">Event Date *</label>
+            <input
+              type="date"
+              id="eventDate-{{ i }}"
+              formControlName="eventDate"
+              class="form-control"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="
+                milestonesArray.at(i).get('eventDate')?.invalid &&
+                milestonesArray.at(i).get('eventDate')?.touched
+              "
+            >
+              Event date is required
+            </div>
+          </div>
+
+          <div class="form-group col-md-6">
+            <label for="category-{{ i }}">Category</label>
+            <select
+              id="category-{{ i }}"
+              formControlName="categoryId"
+              class="form-control"
+            >
+              <option value="">Select Category</option>
+              <option *ngFor="let cat of categories" value="{{ cat.id }}">
+                {{ cat.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description-{{ i }}">Description</label>
+          <textarea
+            id="description-{{ i }}"
+            formControlName="description"
+            class="form-control"
+            rows="3"
+            placeholder="Enter milestone description..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="notes-{{ i }}">Notes</label>
+          <textarea
+            id="notes-{{ i }}"
+            formControlName="notes"
+            class="form-control"
+            rows="2"
+            placeholder="Additional notes..."
+          ></textarea>
+        </div>
+
+        <div class="form-check">
+          <input
+            type="checkbox"
+            id="isMajor-{{ i }}"
+            formControlName="isMajor"
+            class="form-check-input"
+          />
+          <label class="form-check-label" for="isMajor-{{ i }}">
+            Mark as Major Milestone
+          </label>
+        </div>
+
+        <!-- Media Files -->
+        <div class="media-section">
+          <h4>Associated Media</h4>
+          <div [formArrayName]="'mediaFiles'" class="media-list">
+            <div
+              *ngFor="let media of getMediaFilesArray(i).controls; let j = index"
+              [formGroupName]="j"
+              class="media-item"
+            >
+              <div class="form-group">
+                <label for="filename-{{ i }}-{{ j }}">Filename *</label>
+                <input
+                  type="text"
+                  id="filename-{{ i }}-{{ j }}"
+                  formControlName="filename"
+                  class="form-control"
+                  placeholder="e.g., image1.jpg"
+                  readonly
+                />
+                <div
+                  class="invalid-feedback"
+                  *ngIf="
+                    getMediaFilesArray(i).at(j).get('filename')?.invalid &&
+                    getMediaFilesArray(i).at(j).get('filename')?.touched
+                  "
+                >
+                  Filename is required
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="caption-{{ i }}-{{ j }}">Caption</label>
+                  <input
+                    type="text"
+                    id="caption-{{ i }}-{{ j }}"
+                    formControlName="caption"
+                    class="form-control"
+                    placeholder="Photo caption..."
+                  />
+                </div>
+
+                <div class="form-group col-md-6">
+                  <label for="takenDate-{{ i }}-{{ j }}">Taken Date</label>
+                  <input
+                    type="date"
+                    id="takenDate-{{ i }}-{{ j }}"
+                    formControlName="takenDate"
+                    class="form-control"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                (click)="removeMediaFile(i, j)"
+              >
+                Remove Media
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-primary"
+            (click)="addMediaFile(i)"
+          >
+            Add Media File
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-outline-primary"
+      (click)="addMilestone()"
+    >
+      Add Another Milestone
+    </button>
+  </form>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button
+      class="btn btn-secondary"
+      (click)="validateBatch()"
+      [disabled]="isValidating || isUploading"
+    >
+      <span *ngIf="isValidating" class="spinner-border spinner-border-sm mr-2"></span>
+      {{ isValidating ? 'Validating...' : 'Validate' }}
+    </button>
+
+    <button
+      class="btn btn-primary"
+      (click)="performUpload()"
+      [disabled]="isUploading || selectedFiles.length === 0 || !batchForm.valid"
+    >
+      <span *ngIf="isUploading" class="spinner-border spinner-border-sm mr-2"></span>
+      {{ isUploading ? 'Uploading...' : 'Upload Batch' }}
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-outline-secondary"
+      (click)="resetForm()"
+      [disabled]="isUploading"
+    >
+      Reset
+    </button>
+  </div>
+
+  <!-- Upload Results -->
+  <div class="upload-results" *ngIf="uploadedMilestones.length > 0">
+    <h3>Uploaded Milestones</h3>
+    <div class="milestones-summary">
+      <div
+        *ngFor="let milestone of uploadedMilestones"
+        class="milestone-result-card"
+      >
+        <h4>{{ milestone.title }}</h4>
+        <p><strong>Date:</strong> {{ milestone.eventDate | date: 'short' }}</p>
+        <p *ngIf="milestone.category">
+          <strong>Category:</strong> {{ milestone.category.name }}
+        </p>
+        <p *ngIf="milestone.media?.length > 0">
+          <strong>Media Files:</strong> {{ milestone.media.length }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

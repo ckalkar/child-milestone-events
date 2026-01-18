@@ -1,0 +1,139 @@
+<div class="container">
+  <div class="page-header">
+    <div class="header-content">
+      <div>
+        <h1>Photo & Video Gallery</h1>
+        <p class="subtitle">Browse all your memories in one place</p>
+      </div>
+      <div class="header-actions">
+        <input
+          type="file"
+          #fileInput
+          multiple
+          accept="image/*,video/*"
+          (change)="onFileSelected($event)"
+          style="display: none"
+        />
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="fileInput.click()"
+          [disabled]="uploadingMedia"
+        >
+          <mat-icon>add_photo_alternate</mat-icon>
+          Upload Media
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group
+    [(selectedIndex)]="selectedTab"
+    (selectedIndexChange)="onTabChange($event)"
+    class="gallery-tabs"
+  >
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>photo_library</mat-icon>
+        All Media
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>image</mat-icon>
+        Photos Only
+      </ng-template>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>videocam</mat-icon>
+        Videos Only
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Uploading -->
+  <div *ngIf="uploadingMedia" class="uploading-overlay">
+    <mat-card>
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Uploading media...</p>
+    </mat-card>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && media.length === 0" class="empty-state">
+    <mat-icon>photo_library</mat-icon>
+    <h2>No Media Found</h2>
+    <p>Upload photos and videos to start building your gallery!</p>
+    <button mat-raised-button color="primary" (click)="fileInput.click()">
+      Upload First Media
+    </button>
+  </div>
+
+  <!-- Gallery Grid -->
+  <div *ngIf="!loading && media.length > 0" class="gallery-grid">
+    <div
+      *ngFor="let item of media"
+      class="gallery-item"
+      [class.video]="item.fileType === 'video'"
+      (click)="openMedia(item)"
+    >
+      <div class="media-thumbnail">
+        <!-- Image -->
+        <img
+          *ngIf="item.fileType === 'image'"
+          [src]="mediaService.getThumbnailUrl(item)"
+          [alt]="item.originalFilename"
+        />
+
+        <!-- Video -->
+        <div *ngIf="item.fileType === 'video'" class="video-container">
+          <video [src]="mediaService.getMediaUrl(item)"></video>
+          <div class="play-overlay">
+            <mat-icon>play_circle_filled</mat-icon>
+          </div>
+          <div class="video-badge">
+            <mat-icon>videocam</mat-icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="media-overlay">
+        <div class="media-info">
+          <p class="filename">{{ item.originalFilename }}</p>
+          <p class="date" *ngIf="item.takenDate">
+            {{ item.takenDate | date: 'MMM dd, yyyy' }}
+          </p>
+        </div>
+        <div class="media-actions">
+          <button
+            mat-icon-button
+            (click)="openMedia(item)"
+            matTooltip="View Full Size"
+          >
+            <mat-icon>open_in_new</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="deleteMedia(item, $event)"
+            matTooltip="Delete"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="caption" *ngIf="item.caption">
+        <p>{{ item.caption }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+

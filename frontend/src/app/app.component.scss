@@ -1,0 +1,45 @@
+.toolbar-title {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+button.mat-mdc-button {
+  margin-left: 8px;
+  
+  mat-icon {
+    margin-right: 4px;
+  }
+  
+  &.active {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.main-content {
+  min-height: calc(100vh - 64px);
+  background-color: #f5f5f5;
+}
+
+@media (max-width: 768px) {
+  .toolbar-title {
+    font-size: 16px;
+  }
+  
+  button.mat-mdc-button {
+    padding: 0 8px;
+    min-width: auto;
+    
+    mat-icon {
+      margin-right: 0;
+    }
+    
+    span:not(.mat-icon) {
+      display: none;
+    }
+  }
+}
+
