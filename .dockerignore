@@ -1,0 +1,41 @@
+# Docker Build Files
+
+This directory contains Docker configuration files for containerization.
+
+## Files
+
+### Backend
+- **Dockerfile** - Multi-stage NestJS application build
+- Optimized for production with minimal image size
+- Uses Alpine Linux for smaller footprint
+- Health checks configured
+
+### Frontend  
+- **Dockerfile** - Multi-stage Angular build with Nginx
+- Builds Angular app then serves with Nginx
+- Includes gzip compression and caching
+- API proxy to backend configured
+
+### Root
+- **docker-compose.yml** - Orchestrates both services
+- Persistent volumes for data storage
+- Health checks and automatic restart
+- Service networking configured
+
+## Quick Commands
+
+```bash
+# Build and start
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
+
+# Rebuild
+docker-compose build --no-cache
+```
+
+See [DOCKER_GUIDE.md](../DOCKER_GUIDE.md) for detailed documentation.
